@@ -15,4 +15,10 @@ public interface UserService {
 	 * @param user
 	 */
 	public void saveUser(Users user);
+	
+	/**
+	 * 判断用户是否存在
+	 * @return
+	 */
+	public Users queryUserForLogin(String username,String password);
 }
