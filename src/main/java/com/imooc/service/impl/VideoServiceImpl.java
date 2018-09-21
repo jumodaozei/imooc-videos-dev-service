@@ -11,29 +11,40 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.imooc.mapper.SearchRecordsMapper;
+import com.imooc.mapper.UsersLikeVideosMapper;
+import com.imooc.mapper.UsersMapper;
 import com.imooc.mapper.VideosMapper;
 import com.imooc.mapper.VideosMapperCustom;
 import com.imooc.pojo.SearchRecords;
+import com.imooc.pojo.UsersLikeVideos;
 import com.imooc.pojo.Videos;
 import com.imooc.pojo.vo.VideosVO;
 import com.imooc.service.VideoService;
 import com.imooc.utils.PagedResult;
 
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.entity.Example.Criteria;
+
 @Service
 public class VideoServiceImpl implements VideoService {
-	
+
 	@Autowired
 	private Sid sid;
-	
+
 	@Autowired
 	private VideosMapper videosMapper;
-	
+
 	@Autowired
 	private SearchRecordsMapper searchRecordsMapper;
-	
+
+	@Autowired
+	private UsersLikeVideosMapper usersLikeVideosMapper;
 
 	@Autowired
 	private VideosMapperCustom videosMapperCustom;
+
+	@Autowired
+	private UsersMapper usersMapper;
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
@@ -57,19 +68,19 @@ public class VideoServiceImpl implements VideoService {
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public PagedResult getAllVideos(Videos video, Integer isSaveRecord, Integer page,Integer pageSize) {
+	public PagedResult getAllVideos(Videos video, Integer isSaveRecord, Integer page, Integer pageSize) {
 		// TODO Auto-generated method stub]
-		
-		//保存热搜词
+
+		// 保存热搜词
 		String desc = video.getVideoDesc();
-		if(isSaveRecord != null && isSaveRecord == 1) {
+		if (isSaveRecord != null && isSaveRecord == 1) {
 			SearchRecords record = new SearchRecords();
 			String recordId = sid.nextShort();
 			record.setId(recordId);
 			record.setContent(desc);
 			searchRecordsMapper.insert(record);
 		}
-		
+
 		PageHelper.startPage(page, pageSize);
 		List<VideosVO> list = videosMapperCustom.queryAllVideos(desc);
 		PageInfo<VideosVO> pageList = new PageInfo<>(list);
@@ -86,5 +97,43 @@ public class VideoServiceImpl implements VideoService {
 	public List<String> getHotWords() {
 		// TODO Auto-generated method stub
 		return searchRecordsMapper.getHotWords();
+	}
+
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Override
+	public void userLikeVideo(String userId, String videoId, String videoCreaterId) {
+		// TODO Auto-generated method stub
+		// 1 保存用户喜欢视频的关系关联表
+		String likeId = sid.nextShort();
+		UsersLikeVideos ulv = new UsersLikeVideos();
+		ulv.setId(likeId);
+		ulv.setUserId(userId);
+		ulv.setVideoId(videoId);
+		usersLikeVideosMapper.insert(ulv);
+
+		// 2 视频喜欢数量累加
+		videosMapperCustom.addVideoLikeCount(videoId);
+
+		// 3 用户受喜欢数量累加
+		usersMapper.addReceiveLikeCount(videoCreaterId);
+
+	}
+
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Override
+	public void userUnLikeVideo(String userId, String videoId, String videoCreaterId) {
+		// TODO Auto-generated method stub
+		// 1 删除用户喜欢视频的关系关联表
+		Example example = new Example(UsersLikeVideos.class);
+		Criteria criteria = example.createCriteria();
+		criteria.andEqualTo("userId",userId);
+		criteria.andEqualTo("videoId",videoId);
+		usersLikeVideosMapper.deleteByExample(example);
+
+		// 2 视频喜欢数量累加
+		videosMapperCustom.reduceVideoLikeCount(videoId);
+
+		// 3 用户受喜欢数量累加
+		usersMapper.reduceReceiveLikeCount(videoCreaterId);
 	}
 }

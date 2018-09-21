@@ -14,4 +14,21 @@ public interface VideoService {
 	public PagedResult getAllVideos(Videos video, Integer isSaveRecord, Integer page,Integer pageSize);
 	
 	public List<String> getHotWords();
+	
+	/**
+	 * 
+	 * @param userId 喜欢视频的用户的id
+	 * @param videoId 喜欢的视频的id
+	 * @param videoCreaterId 喜欢的视频发布者的id
+	 */
+	public void userLikeVideo(String userId,String videoId,String videoCreaterId);
+	
+	
+	/**
+	 * 
+	 * @param userId 喜欢视频的用户的id
+	 * @param videoId 喜欢的视频的id
+	 * @param videoCreaterId 喜欢的视频发布者的id
+	 */
+	public void userUnLikeVideo(String userId,String videoId,String videoCreaterId);
 }
