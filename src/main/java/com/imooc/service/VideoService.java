@@ -31,4 +31,14 @@ public interface VideoService {
 	 * @param videoCreaterId 喜欢的视频发布者的id
 	 */
 	public void userUnLikeVideo(String userId,String videoId,String videoCreaterId);
+	
+	/**
+	 * @Description: 查询我喜欢的视频列表
+	 */
+	public PagedResult queryMyLikeVideos(String userId, Integer page, Integer pageSize);
+	
+	/**
+	 * @Description: 查询我关注的人的视频列表
+	 */
+	public PagedResult queryMyFollowVideos(String userId, Integer page, Integer pageSize);
 }
