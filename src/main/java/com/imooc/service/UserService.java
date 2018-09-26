@@ -1,6 +1,7 @@
 package com.imooc.service;
 
 import com.imooc.pojo.Users;
+import com.imooc.pojo.UsersReport;
 
 public interface UserService {
 	/**
@@ -53,4 +54,7 @@ public interface UserService {
 	
 	
 	public boolean queryIsFollow(String userId,String fanId);
+	
+	
+	public void reportUser(UsersReport usersReport);
 }

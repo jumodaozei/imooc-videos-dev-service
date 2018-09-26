@@ -1,5 +1,6 @@
 package com.imooc.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,9 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.imooc.mapper.UsersFansMapper;
 import com.imooc.mapper.UsersLikeVideosMapper;
 import com.imooc.mapper.UsersMapper;
+import com.imooc.mapper.UsersReportMapper;
 import com.imooc.pojo.Users;
 import com.imooc.pojo.UsersFans;
 import com.imooc.pojo.UsersLikeVideos;
+import com.imooc.pojo.UsersReport;
 import com.imooc.service.UserService;
 
 import tk.mybatis.mapper.entity.Example;
@@ -31,7 +34,10 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UsersLikeVideosMapper usersLikeVideosMapper;
-
+	
+	@Autowired
+	private UsersReportMapper usersReportMapper;
+ 
 	@Autowired
 	private Sid sid;
 
@@ -143,6 +149,7 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	@Transactional(propagation = Propagation.SUPPORTS)
 	@Override
 	public boolean queryIsFollow(String userId, String fanId) {
 		// TODO Auto-generated method stub
@@ -155,6 +162,17 @@ public class UserServiceImpl implements UserService {
 			return true;
 		}
 		return false;
+	}
+
+	@Transactional(propagation = Propagation.REQUIRED)
+	@Override
+	public void reportUser(UsersReport usersReport) {
+		// TODO Auto-generated method stub
+		//其他信息在前台已经赋值过了 这里只需要赋值这两个信息即可
+		String urId = sid.nextShort();
+		usersReport.setId(urId);
+		usersReport.setCreateDate(new Date());
+		usersReportMapper.insert(usersReport);
 	}
 
 }
